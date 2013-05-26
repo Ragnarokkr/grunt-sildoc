@@ -1,0 +1,9 @@
+./node_modules/
+./test/
+./tmp/
+./src-doc/
+
+.*
+Gruntfile.js
+
+chrome-i18n.sublime-*

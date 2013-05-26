@@ -1,0 +1,19 @@
+## The "<%= meta.name.replace(/^grunt\-/,'') %>" task
+
+### Overview
+In your project's Gruntfile, add a section named `<%= meta.name.replace(/^grunt\-/,'') %>` to the data object passed into `grunt.initConfig()`.
+
+```js
+grunt.initConfig({
+  <%= meta.name.replace(/grunt\-/,'') %>: {
+    options: {
+      // Task-specific options go here.
+    },
+    your_target: {
+      // Target-specific file lists and/or options go here.
+    },
+  },
+})
+```
+
+**<%= meta.name.replace(/^grunt\-/,'') %>** is the acronym for <%= meta.description %> (Si.L.Do.C.). Its goal is to make easier the procedure of generating project documentation, by allowing the developer to use Grunt's [internal templating processor][grunt-template] to process documents with external custom data. This README file itself was generated with this plugin.

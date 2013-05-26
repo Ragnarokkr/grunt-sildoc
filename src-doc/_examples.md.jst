@@ -1,0 +1,93 @@
+<% var index = ['\<%=', 'index', '%\>'] %>
+<% var part_head = ['\<%=', 'partials.header', '%\>'] %>
+<% var part_cont = ['\<%=', 'partials.content', '%\>'] %>
+<% var part_foot = ['\<%=', 'partials.footer', '%\>'] %>
+<% var lorem = ['\<%=', 'meta.loremIpsum', '%\>'] %>
+<% var forloop = ['\<%', 'for (var i = 0; i < 10; i++) {', '%\>\n', '  \<%=', 'meta.loremIpsum', '%\>\n', '} %\>'] %>
+<% var name = ['\<%=', 'meta.name', '%\>'] %>
+<% var year = ['\<%=', 'grunt.template.today(\'yyyy\')', '%\>'] %>
+
+### Usage Examples
+
+#### Default Options
+If no options are specified, the generated document will be the result of all its source files concatenated in loading
+order. No data will be available inside the template processor.
+
+In this example, the file `dest/document.md` is built starting from `src/header.md.jst`, `src/content.md.jst`, and `src/footer.md.jst`.
+
+```js
+grunt.initConfig({
+  <%= meta.name.replace(/grunt\-/,'') %>: {
+    options: {},
+    files: {
+      'dest/document.md': ['src/header.md.jst', 'src/content.md.jst', 'src/footer.md.jst']
+    }
+  }
+})
+```
+
+Please, note that if we had specified `src/*.jst` as source, the concatentaion order should been: content, footer, and header. So, the order of declaring the sources is important, when we don't use a template file.
+
+#### Custom Options
+It's possibile to specify options globally (per task) and/or locally (per target). All the options (except `meta` and `data`) can be specified either globally or locally. Instead, `meta` option can be used only to specify global data (consumed by all the targets), and `data` option can be used to specify local data (consumed by the specific taget only). Inside the template processor, global and local data are mixed together and available via the `meta` object.
+
+When a `template` file is specified, all the sources are considered partials and loaded **only** if their file name follows a simple rule: an underscore heading the name (for example, `_header.md.jst`, `_footer.txt`, etc.). If the rule isn't satisfied, the file is discarded and a warning is printed out on the console. Inside the template it will be possibile to reference at those partials file via the `partials` object. (Inside this object, the name of the partial is the same of its filename, without the heading underscore and all the suffixes).
+
+If an `index` is required, a `<%- index.join(' ') %>` tag must be defined along the template, into the place we want the index will appears. Currently only GitHub Flavoured Markdown indeces are supported. (Github automatically generates the link reference for each heading in document, so the index just targets the link to that reference.)
+
+In this example, the file `dest/document.md` is built starting from `src/_header.md.jst`, `src/_content.md.jst`, and `src/_footer.md.jst`. The template `src/document.md.jst` is used.
+
+The file **document.md.jst**:
+
+```markdown
+<%- part_head.join(' ') %>
+<%- part_cont.join(' ') %>
+<%- part_foot.join(' ') %>
+```
+
+The file **_header.md.jst**:
+
+```markdown
+# HEADER
+
+<%- index.join(' ') %>
+
+## Introduction
+
+<%- lorem.join(' ') %>
+```
+
+The file **_content.md.jst**:
+
+```markdown
+## CONTENTS
+
+<%- forloop.join(' ') %>
+```
+
+The file **_footer.md.jst**:
+
+```markdown
+---
+<%- name.join(' ') %> - Copyright (c) <%- year.join(' ') %>
+```
+
+The task:
+
+```js
+grunt.initConfig({
+  <%= meta.name.replace(/grunt\-/,'') %>: {
+    options: {
+      meta: {
+        loremIpsum: 'Lorem ipsum dolor sit amet, consectetur adipisicing elit.',
+        name: 'document'
+      },
+      template: 'src/document.md.jst',
+      index: 'gfm'
+    },
+    files: {
+      'dest/document.md': ['src/_*.jst']
+    }
+  }
+})
+```

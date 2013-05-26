@@ -1,0 +1,24 @@
+# Test file - Single, no index
+
+## Chap 1
+
+<% if( meta.upcase ) { print( meta.lorem.toUpperCase() ); } else  { print( meta.lorem ); } %>
+
+## Chap 2
+
+<% if( meta.upcase ) { print( meta.lorem.toUpperCase() ); } else  { print( meta.lorem ); } %>
+
+### Sub-chap 1
+
+<% if( meta.upcase ) { print( meta.lorem.toUpperCase() ); } else  { print( meta.lorem ); } %>
+
+#### Sub-sub-chap 1
+
+<% for (i = 0; i < 2; i++) {
+    if( meta.upcase ) { 
+        print( meta.lorem.toUpperCase() ); 
+    } else { 
+        print( meta.lorem ); 
+    }
+    print( '\n' );
+} %>

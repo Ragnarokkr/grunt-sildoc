@@ -14,7 +14,8 @@ module.exports = function(grunt) {
 		path = require( 'path' ),
 		_ = grunt.util._,
 		// Define the RegExp to filter valid partials
-		rePartialFilter = /^_+([^.]+)(?:\..+)*$/i;
+		rePartialFilter = /^_+([^.]+)(?:\..+)*$/i,
+		reForcedUnmanagedTag = /<!%(.?)(\s+.*?\s+)%>/ig;
 
 	grunt.registerMultiTask('sildoc', 'Compile your documentation', function() {
 		// Merge task-specific and/or target-specific options with these defaults.
@@ -120,6 +121,9 @@ module.exports = function(grunt) {
 
 			// Final processing
 			doc.processed = grunt.template.process( String(doc), { data: data } );
+
+			// Restore the forcedly unmanaged template tags (<!%...%>)
+			doc.processed = String(doc).replace( reForcedUnmanagedTag, '<%$1$2%>' );
 
 			// Write the destination file.
 			grunt.file.write( f.dest, String(doc) );

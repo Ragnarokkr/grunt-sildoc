@@ -1,12 +1,3 @@
-<% var index = ['\<%=', 'index', '%\>'] %>
-<% var part_head = ['\<%=', 'partials.header', '%\>'] %>
-<% var part_cont = ['\<%=', 'partials.content', '%\>'] %>
-<% var part_foot = ['\<%=', 'partials.footer', '%\>'] %>
-<% var lorem = ['\<%=', 'meta.loremIpsum', '%\>'] %>
-<% var forloop = ['\<%', 'for (var i = 0; i < 10; i++) {', '%\>\n', '  \<%=', 'meta.loremIpsum', '%\>\n', '} %\>'] %>
-<% var name = ['\<%=', 'meta.name', '%\>'] %>
-<% var year = ['\<%=', 'grunt.template.today(\'yyyy\')', '%\>'] %>
-
 ### Usage Examples
 
 #### Default Options
@@ -26,23 +17,23 @@ grunt.initConfig({
 })
 ```
 
-Please, note that if we had specified `src/*.jst` as source, the concatentaion order should been: content, footer, and header. So, the order of declaring the sources is important, when we don't use a template file.
+Please, note that if we had used globbing (such as `src/*.jst`) as source, the concatenating order would been: content, footer, and header. Therefore, the declaration order of the sources is important, when we don't use a template file.
 
 #### Custom Options
-It's possibile to specify options globally (per task) and/or locally (per target). All the options (except `meta` and `data`) can be specified either globally or locally. Instead, `meta` option can be used only to specify global data (consumed by all the targets), and `data` option can be used to specify local data (consumed by the specific taget only). Inside the template processor, global and local data are mixed together and available via the `meta` object.
+It's possibile to specify options globally (per task) and/or locally (per target). All the options (except `meta` and `data`) can be specified either globally or locally. Instead, `meta` option can be used only to specify global data (consumed by all the targets), and `data` option can be used to specify local data (consumed by the specific target only). Inside the template processor, global and local data are mixed together and available via the `meta` object.
 
-When a `template` file is specified, all the sources are considered partials and loaded **only** if their file name follows a simple rule: an underscore heading the name (for example, `_header.md.jst`, `_footer.txt`, etc.). If the rule isn't satisfied, the file is discarded and a warning is printed out on the console. Inside the template it will be possibile to reference at those partials file via the `partials` object. (Inside this object, the name of the partial is the same of its filename, without the heading underscore and all the suffixes).
+When a `template` file is specified, all the sources are considered partials and loaded **only** if their file name follows a simple rule: a leading underscore into the filename (for example, `_header.md.jst`, `_footer.txt`, etc.). If the rule isn't satisfied, the file is discarded and a warning is printed out on the console. Inside the template it will be possibile to reference at those partials via the `partials` object. (Inside this object, the name of the partial is the same of its filename, stripped out of the leading underscore and all the suffixes).
 
-If an `index` is required, a `<%- index.join(' ') %>` tag must be defined along the template, into the place we want the index will appears. Currently only GitHub Flavoured Markdown indeces are supported. (Github automatically generates the link reference for each heading in document, so the index just targets the link to that reference.)
+If an `index` is required, a `<!%= index %>` tag must be defined into the template, at the position where we want it to be inserted. Currently only GitHub Flavoured Markdown indeces are supported. (Github automatically generates the link reference for each heading in document, so the index just targets the link to that reference.)
 
 In this example, the file `dest/document.md` is built starting from `src/_header.md.jst`, `src/_content.md.jst`, and `src/_footer.md.jst`. The template `src/document.md.jst` is used.
 
 The file **document.md.jst**:
 
 ```markdown
-<%- part_head.join(' ') %>
-<%- part_cont.join(' ') %>
-<%- part_foot.join(' ') %>
+<!%= partials.header %>
+<!%= partials.contents %>
+<!%= partials.footer %>
 ```
 
 The file **_header.md.jst**:
@@ -50,11 +41,11 @@ The file **_header.md.jst**:
 ```markdown
 # HEADER
 
-<%- index.join(' ') %>
+<!%= index %>
 
 ## Introduction
 
-<%- lorem.join(' ') %>
+<!%= meta.loremIspum %>
 ```
 
 The file **_content.md.jst**:
@@ -62,14 +53,16 @@ The file **_content.md.jst**:
 ```markdown
 ## CONTENTS
 
-<%- forloop.join(' ') %>
+<!% for (var i = 0; i < 10; i++) { %>
+    <!%= meta.loremIpsum %>
+<!% } %>
 ```
 
 The file **_footer.md.jst**:
 
 ```markdown
 ---
-<%- name.join(' ') %> - Copyright (c) <%- year.join(' ') %>
+<!%= meta.name %> - Copyright (c) <!%= grunt.template.today('yyyy') %>
 ```
 
 The task:
@@ -91,3 +84,34 @@ grunt.initConfig({
   }
 })
 ```
+
+That's what we should obtain as result:
+
+```markdown
+# HEADER
+
+* [Introduction](#introduction)
+* [CONTENTS](#contents)
+
+## Introduction
+
+Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+
+## CONTENTS
+
+Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+
+---
+document - Copyright (c) <%= grunt.template.today('yyyy') %>
+```
+
+**NOTE:** due to the recursive nature of the internal template processor, to avoid the unwanted processing of template tags, you **MUST** insert an exclamation point (`!`) between the opening angular parenthesis and percent sign (`<!%`). These *forcedly unmanaged tags* will be restored to their correct values once the template will be completely processed, just before to write the results on disk.

@@ -13,37 +13,42 @@ module.exports = function(grunt) {
 	var // Load required libraries
 		path = require( 'path' ),
 		_ = grunt.util._,
-		// Define the RegExp to filter valid partials
+		// RegExp to filter valid partials
 		rePartialFilter = /^_+([^.]+)(?:\..+)*$/i,
+		// RegExp to match the forcedly unmanaged tags
 		reForcedUnmanagedTag = /<!%(.?)(\s+.*?\s+)%>/ig;
 
 	grunt.registerMultiTask('sildoc', 'Compile your documentation', function() {
 		// Merge task-specific and/or target-specific options with these defaults.
 		var options = this.options({
-				meta: {},
-				template: '',
-				index: 'none',
+			meta: {},
+			template: '',
+			index: {
+				format: 'none',
 				mainHeading: false
-			}),
+			}
+		}),
 
 		// Buffer for intermediate states of the document. If coerced to String
-		// it will return always the last generated state in order: processed,
-		// intermediate, and template.
-			doc = {
-				template: '',
-				intermediate: '',
-				processed: '',
-				index: '',
-				indexerPath: '',
-				indexer: null,
-				toString: function(){
-					return this.processed || this.intermediate || this.template || '';
-				}
+		// it will return always the last generated state, in order: processed,
+		// intermediate, template, and ''.
+		doc = {
+			index: '',
+			template: '',
+			intermediate: '',
+			processed: '',
+			indexer: {
+				path: '',
+				plugin: null
 			},
+			toString: function(){
+				return this.processed || this.intermediate || this.template || '';
+			}
+		},
 
 		// Data buffer to pass to the template processor. It's the result of the
 		// mixing of global task meta and local sub-task data options.
-			data = { meta: _({}).extend( options.meta, options.data || {} ) };
+		data = { meta: _({}).extend( options.meta, options.data || {} ) };
 
 		// Read the template (if was set).
 		if ( options.template ) {
@@ -58,15 +63,15 @@ module.exports = function(grunt) {
 		} // if
 
 		// Load the indexer (if was set).
-		if ( options.index !== 'none' ) {
-			doc.indexerPath = './lib/indexer_' + options.index;
+		if ( options.index.format !== 'none' ) {
+			doc.indexer.path = './lib/indexer_' + options.index.format;
 			try {
-				grunt.verbose.write( 'Loading indexer "' + doc.indexerPath + '"...' );
-				doc.indexer = require( doc.indexerPath ).init( grunt );
+				grunt.verbose.write( 'Loading indexer "' + doc.indexer.path + '"...' );
+				doc.indexer.plugin = require( doc.indexer.path ).init( grunt );
 				grunt.verbose.ok();
 			} catch ( e ) {
 				grunt.verbose.error();
-				grunt.log.warn( 'Index of format "' + options.index + '" not supported.' );
+				grunt.log.warn( 'Index format "' + options.index.format + '" not supported.' );
 			} // try..catch
 		} // if
 
@@ -106,14 +111,14 @@ module.exports = function(grunt) {
 				doc.template = partials[1].join( grunt.util.linefeed );
 			} // if..else
 
-			// Indexing with required indexer (if supported).
-			if ( doc.indexer ) {
+			// Indexing with required indexer.
+			if ( doc.indexer.plugin ) {
 				// Temporarly inhibit the index tag
 				doc.template = String(doc).replace( '<%= index %>', '{{ index }}' );
 				// Intermediate processing
 				doc.intermediate = grunt.template.process( String(doc), { data: data } );
 				// Generate index
-				doc.index = doc.indexer.process( String(doc), options );
+				doc.index = doc.indexer.plugin.process( String(doc), options.index );
 				_( data ).extend( { index: doc.index } );
 				// Re-enable index tag
 				doc.intermediate = String(doc).replace( '{{ index }}', '<%= index %>' );
@@ -130,6 +135,7 @@ module.exports = function(grunt) {
 
 			// Print a success message.
 			grunt.log.writeln( 'File "' + f.dest + '" created.' );
+
 		});
 	});
 

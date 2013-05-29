@@ -29,11 +29,11 @@ module.exports = function(grunt) {
 			all: [
 				'Gruntfile.js',
 				'tasks/*.js',
-				'<%= nodeunit.tests %>',
+				'<%= nodeunit.tests %>'
 			],
 			options: {
-				jshintrc: '.jshintrc',
-			},
+				jshintrc: '.jshintrc'
+			}
 		},
 
 		// Before generating any new files, remove any previously-created files.
@@ -69,15 +69,19 @@ module.exports = function(grunt) {
 			},
 			singleIndex: {
 				options: {
-					index: 'gfm'
+					index: {
+						format: 'gfm'
+					}
 				},
 				src: [ './test/fixtures/single_index.md.jst' ],
 				dest: './tmp/single_index.md'
 			},
 			singleIndexMain: {
 				options: {
-					index: 'gfm',
-					mainHeading: true
+					index: {
+						format: 'gfm',
+						mainHeading: true
+					}
 				},
 				src: [ './test/fixtures/single_index.md.jst' ],
 				dest: './tmp/single_index_main.md'
@@ -91,7 +95,9 @@ module.exports = function(grunt) {
 					data: {
 						multi: true
 					},
-					index: 'gfm'
+					index: {
+						format: 'gfm'
+					}
 				},
 				src: [ './test/fixtures/_header.md.jst', './test/fixtures/_*.md.jst' ],
 				dest: './tmp/multi_index.md'
@@ -105,7 +111,9 @@ module.exports = function(grunt) {
 			},
 			templateIndex: {
 				options: {
-					index: 'gfm',
+					index: {
+						format: 'gfm'
+					},
 					template: './test/fixtures/template_index.md.jst'
 				},
 				src: [ './test/fixtures/_*.md.jst', '!./test/fixtures/_multi*.md.jst' ],
@@ -136,8 +144,8 @@ module.exports = function(grunt) {
 
 		// Unit tests.
 		nodeunit: {
-			tests: ['test/*_test.js'],
-		},
+			tests: ['test/*_test.js']
+		}
 
 	});
 

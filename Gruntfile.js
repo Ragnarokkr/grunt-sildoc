@@ -153,11 +153,7 @@ module.exports = function(grunt) {
 	grunt.loadTasks('tasks');
 
 	// These plugins provide necessary tasks.
-	Object.keys( grunt.config( 'pkg' ).devDependencies ).forEach( function( dep ){
-		if ( /^grunt\-/i.test( dep ) ) {
-			grunt.loadNpmTasks( dep );
-		} // if
-	});
+	require( 'matchdep' ).filterDev( 'grunt-*' ).forEach( grunt.loadNpmTasks );
 
 	// Whenever the "test" task is run, first clean the "tmp" dir, then run this
 	// plugin's task(s), then test the result.

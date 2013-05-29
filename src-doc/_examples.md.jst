@@ -45,7 +45,7 @@ The file **_header.md.jst**:
 
 ## Introduction
 
-<!%= meta.loremIspum %>
+<!%= meta.loremIpsum %>
 ```
 
 The file **_content.md.jst**:
@@ -69,19 +69,21 @@ The task:
 
 ```js
 grunt.initConfig({
-  <%= meta.name.replace(/grunt\-/,'') %>: {
-    options: {
-      meta: {
-        loremIpsum: 'Lorem ipsum dolor sit amet, consectetur adipisicing elit.',
-        name: 'document'
-      },
-      template: 'src/document.md.jst',
-      index: 'gfm'
-    },
-    files: {
-      'dest/document.md': ['src/_*.jst']
+    <%= meta.name.replace(/grunt\-/,'') %>: {
+        options: {
+            meta: {
+                loremIpsum: 'Lorem ipsum dolor sit amet, consectetur adipisicing elit.',
+                name: 'document'
+            },
+            template: 'src/document.md.jst',
+            index: {
+                format: 'gfm'
+            }
+        },
+        files: {
+        'dest/document.md': ['src/_*.jst']
+        }
     }
-  }
 })
 ```
 

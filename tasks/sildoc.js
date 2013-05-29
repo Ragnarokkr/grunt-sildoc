@@ -13,10 +13,12 @@ module.exports = function(grunt) {
 	var // Load required libraries
 		path = require( 'path' ),
 		_ = grunt.util._,
-		// RegExp to filter valid partials
-		rePartialFilter = /^_+([^.]+)(?:\..+)*$/i,
-		// RegExp to match the forcedly unmanaged tags
-		reForcedUnmanagedTag = /<!%(.?)(\s+.*?\s+)%>/ig;
+		re = {
+			// Filter valid partials and strip everything but the name
+			partial: /^_+([^.]+)(?:\..+)*$/i,
+			// Match unmanaged tags and its components
+			unmanagedTag: /<!%(.?)(\s+.*?\s+)%>/ig
+		};
 
 	grunt.registerMultiTask('sildoc', 'Compile your documentation', function() {
 		// Merge task-specific and/or target-specific options with these defaults.
@@ -89,7 +91,7 @@ module.exports = function(grunt) {
 
 				// Source files are assumed to be real partials only if a
 				// template was set, otherwise any kind of file name can be used.
-				if ( options.template && !rePartialFilter.test( path.basename( filepath ) ) ) {
+				if ( options.template && !re.partial.test( path.basename( filepath ) ) ) {
 					grunt.log.warn('File "' + filepath + '" is not a partial.');
 					return false;
 				} // if
@@ -98,7 +100,7 @@ module.exports = function(grunt) {
 			}).forEach( function( filepath ) {
 				// Store all the partials
 				var	basename = path.basename( filepath );
-				partials[0].push( options.template ? basename.match( rePartialFilter )[1] : basename );
+				partials[0].push( options.template ? basename.match( re.partial )[1] : basename );
 				partials[1].push( grunt.util.normalizelf( grunt.file.read( filepath ) ) );
 			});
 
@@ -128,7 +130,7 @@ module.exports = function(grunt) {
 			doc.processed = grunt.template.process( String(doc), { data: data } );
 
 			// Restore the forcedly unmanaged template tags (<!%...%>)
-			doc.processed = String(doc).replace( reForcedUnmanagedTag, '<%$1$2%>' );
+			doc.processed = String(doc).replace( re.unmanagedTag, '<%$1$2%>' );
 
 			// Write the destination file.
 			grunt.file.write( f.dest, String(doc) );
